@@ -6,7 +6,7 @@
     "version": "1.0.0",
     "minimumCoreVersion": "0.8.6",
     "compatibleCoreVersion": "0.8.6",
-    "url": "https://github.com/kid2407/",
+    "url": "https://github.com/kid2407/baka-chat",
     "scripts": [
         "scripts/main.js"
     ]
