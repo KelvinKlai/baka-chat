@@ -30,7 +30,7 @@ function handleChatMessage(message) {
 
         if (natural20) {
             ChatMessage.create({
-                "content": "Omae wa mou shindeiru!<img src=" + MODULE_FILE_DIR + "'/img/nat20.png' alt='Omae wa mou shindeiru!'>",
+                "content": "Omae wa mou shindeiru!<img src='" + MODULE_FILE_DIR + "/img/nat20.png' alt='Omae wa mou shindeiru!'>",
                 "speaker": {
                     "alias": "Kenshiro",
                 }
@@ -40,7 +40,7 @@ function handleChatMessage(message) {
         }
         if (natural1) {
             ChatMessage.create({
-                "content": "<img src=" + MODULE_FILE_DIR + "'/img/nat1.jpg' alt='Baka!'>",
+                "content": "<img src='" + MODULE_FILE_DIR + "/img/nat1.jpg' alt='Baka!'>",
                 "speaker": {
                     "alias": "The Army"
                 }
