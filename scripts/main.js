@@ -4,13 +4,18 @@
 function handleChatMessage(message) {
     if (message.isRoll) {
         let natural20 = false
-        let natural1  = false
-        let roll      = message.roll;
-        for (let i = 0; i < roll.dice.length; i++) {
-            let dice = roll.dice[i]
+        let natural1 = false
+        let dice, singleDice
+        let i, j
+        /** @var {Roll} roll */
+        let roll = message.roll;
+        for (i = 0; i < roll.dice.length; i++) {
+            /** @var {DiceTerm} dice */
+            dice = roll.dice[i]
             if (!natural20 && !natural1 && dice.faces === 20) {
-                for (let j = 0; j < dice.results.length; j++) {
-                    let singleDice = dice.results[j]
+                for (j = 0; j < dice.results.length; j++) {
+                    /** @var {DiceTermResult} */
+                    singleDice = dice.results[j]
                     if (singleDice.result === 20) {
                         natural20 = true
                     }
@@ -23,7 +28,7 @@ function handleChatMessage(message) {
 
         if (natural20) {
             ChatMessage.create({
-                "content": "<img src='/modules/baka-chat/img/nat20.png' alt='Omae wa mou shindeiru!'>",
+                "content": "Omae wa mou shindeiru!<img src='/modules/baka-chat/img/nat20.png' alt='Omae wa mou shindeiru!'>",
                 "speaker": {
                     "alias": "Kenshiro",
                 }
@@ -35,19 +40,16 @@ function handleChatMessage(message) {
             ChatMessage.create({
                 "content": "<img src='/modules/baka-chat/img/nat1.jpg' alt='Baka!'>",
                 "speaker": {
-                    "alias": "Yukihira Soma"
+                    "alias": "The Army"
                 }
             }).then()
         }
-
-        console.log(`Rolled a total of ${roll.result} with the dice being a d${roll.dice[0].faces} and it rolled (hopefully) on the dice a ${roll.dice[0].total}.`)
     }
 }
 
 Hooks.on("ready", function () {
     setTimeout(function () {
         ChatMessage.create({"content": "Baka-Test loaded!"}).then()
-
         Hooks.on('renderChatMessage', handleChatMessage)
     }, 1000)
 })
