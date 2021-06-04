@@ -1,3 +1,5 @@
+const MODULE_FILE_DIR = "/modules/baka-chat"
+
 /**
  * @param {ChatMessage} message
  */
@@ -28,7 +30,7 @@ function handleChatMessage(message) {
 
         if (natural20) {
             ChatMessage.create({
-                "content": "Omae wa mou shindeiru!<img src='/modules/baka-chat/img/nat20.png' alt='Omae wa mou shindeiru!'>",
+                "content": "Omae wa mou shindeiru!<img src=" + MODULE_FILE_DIR + "'/img/nat20.png' alt='Omae wa mou shindeiru!'>",
                 "speaker": {
                     "alias": "Kenshiro",
                 }
@@ -38,7 +40,7 @@ function handleChatMessage(message) {
         }
         if (natural1) {
             ChatMessage.create({
-                "content": "<img src='/modules/baka-chat/img/nat1.jpg' alt='Baka!'>",
+                "content": "<img src=" + MODULE_FILE_DIR + "'/img/nat1.jpg' alt='Baka!'>",
                 "speaker": {
                     "alias": "The Army"
                 }
