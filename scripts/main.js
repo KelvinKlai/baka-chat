@@ -1,4 +1,44 @@
-const MODULE_FILE_DIR = "/modules/baka-chat"
+import {
+    DEFAULT_CONFIG,
+    MODULE_ID,
+    NAT1_IMAGE_KEY,
+    NAT1_SPEAKER,
+    NAT1_TEXT,
+    NAT20_IMAGE_KEY,
+    NAT20_SPEAKER,
+    NAT20_TEXT
+} from "./config.js";
+
+let activeSettings = {}
+
+function registerConfig() {
+    let baseConfigData = {
+        scope  : "world",
+        config : true,
+        type   : String,
+        default: ""
+    }
+    let mergedConfig = {}
+
+    for (let configKey in DEFAULT_CONFIG) {
+        mergedConfig = {...baseConfigData, ...DEFAULT_CONFIG[configKey]}
+        mergedConfig["onChange"] = value => {
+            activeSettings[configKey] = value
+        }
+
+        game.settings.register(MODULE_ID, configKey, mergedConfig)
+    }
+}
+
+function loadConfig() {
+    if (!game.settings.hasOwnProperty(MODULE_ID)) {
+        registerConfig()
+    }
+
+    for (let configKey in DEFAULT_CONFIG) {
+        activeSettings[configKey] = game.settings.get(MODULE_ID, configKey)
+    }
+}
 
 /**
  * @param {ChatMessage} message
@@ -10,7 +50,7 @@ function handleChatMessage(message) {
         let dice, singleDice
         let i, j
         /** @var {Roll} roll */
-        let roll = message.roll;
+        let roll = message.roll
         for (i = 0; i < roll.dice.length; i++) {
             /** @var {DiceTerm} dice */
             dice = roll.dice[i]
@@ -30,19 +70,18 @@ function handleChatMessage(message) {
 
         if (natural20) {
             ChatMessage.create({
-                "content": "Omae wa mou shindeiru!<img src='" + MODULE_FILE_DIR + "/img/nat20.png' alt='Omae wa mou shindeiru!'>",
+                "content": activeSettings[NAT20_TEXT] + "<img src='" + activeSettings[NAT20_IMAGE_KEY] + "' alt='" + activeSettings[NAT20_TEXT] + "'>",
                 "speaker": {
-                    "alias": "Kenshiro",
+                    "alias": activeSettings[NAT20_SPEAKER],
                 }
             }).then()
-
-
         }
+
         if (natural1) {
             ChatMessage.create({
-                "content": "<img src='" + MODULE_FILE_DIR + "/img/nat1.jpg' alt='Baka!'>",
+                "content": activeSettings[NAT1_TEXT] + "<img src='" + activeSettings[NAT1_IMAGE_KEY] + "' alt='" + activeSettings[NAT1_TEXT] + "'>",
                 "speaker": {
-                    "alias": "The Army"
+                    "alias": activeSettings[NAT1_SPEAKER]
                 }
             }).then()
         }
@@ -50,8 +89,8 @@ function handleChatMessage(message) {
 }
 
 Hooks.on("ready", function () {
+    loadConfig()
     setTimeout(function () {
-        ChatMessage.create({"content": "Baka-Test loaded!"}).then()
         Hooks.on('renderChatMessage', handleChatMessage)
     }, 1000)
 })
