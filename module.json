@@ -8,6 +8,7 @@
     "compatibleCoreVersion": "0.8.6",
     "url": "https://github.com/kid2407/baka-chat",
     "download": "https://github.com/kid2407/baka-chat/releases/latest/download/baka-chat.zip",
+    "manifest": "https://github.com/kid2407/baka-chat/releases/latest/download/module.json",
     "readme": "README.md",
     "license": "LICENSE.md",
     "esmodules": [
