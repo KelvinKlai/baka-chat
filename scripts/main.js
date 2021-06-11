@@ -90,7 +90,5 @@ function handleChatMessage(message) {
 
 Hooks.on("ready", function () {
     loadConfig()
-    setTimeout(function () {
-        Hooks.on('renderChatMessage', handleChatMessage)
-    }, 1000)
+    Hooks.on('createChatMessage', handleChatMessage)
 })
