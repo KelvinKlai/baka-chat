@@ -10,6 +10,7 @@ import {
 } from "./config.js";
 
 let activeSettings = {}
+let betterRolls5ePresent
 
 function registerConfig() {
     let baseConfigData = {
@@ -41,34 +42,103 @@ function loadConfig() {
 }
 
 /**
+ * Handles the "normal" rolls, without any modules installed
+ *
  * @param {ChatMessage} message
+ * @returns {{nat20: boolean, nat1:boolean}}
  */
-function handleChatMessage(message) {
-    if (message.isRoll) {
-        let natural20 = false
-        let natural1 = false
-        let dice, singleDice
-        let i, j
-        /** @var {Roll} roll */
-        let roll = message.roll
-        for (i = 0; i < roll.dice.length; i++) {
-            /** @var {DiceTerm} dice */
-            dice = roll.dice[i]
-            if (!natural20 && !natural1 && dice.faces === 20) {
-                for (j = 0; j < dice.results.length; j++) {
-                    /** @var {DiceTermResult} */
-                    singleDice = dice.results[j]
-                    if (singleDice.result === 20) {
-                        natural20 = true
-                    }
-                    else if (singleDice.result === 1) {
-                        natural1 = true
+function handleNormalRolls(message) {
+    let natural20 = false
+    let natural1 = false
+    let dice, singleDice, i, j;
+    /** @var {Roll} roll */
+    let roll = message.roll
+    for (i = 0; i < roll.dice.length; i++) {
+        /** @var {DiceTerm} dice */
+        dice = roll.dice[i]
+        if (!natural20 && !natural1 && dice.faces === 20) {
+            for (j = 0; j < dice.results.length; j++) {
+                /** @var {DiceTermResult} */
+                singleDice = dice.results[j]
+                if (singleDice.result === 20) {
+                    natural20 = true
+                }
+                else if (singleDice.result === 1) {
+                    natural1 = true
+                }
+            }
+        }
+    }
+
+    return {
+        "nat1" : natural1,
+        "nat20": natural20
+    }
+}
+
+/**
+ * Handles rolls made with betterdice5e
+ *
+ * @param {ChatMessage} message
+ * @returns {{nat20: boolean, nat1:boolean}}
+ */
+function handleBetterDice5ERolls(message) {
+    let natural20 = false
+    let natural1 = false
+    let betterRollData = message.data.flags.betterrolls5e.entries
+    let entries, entryTerms, entryDiceTerm, entryDiceTermKey, entryDiceTermResultKey, entryDiceTermResults, rolledValue
+    for (let singleRollDataKey in betterRollData) {
+        if (betterRollData.hasOwnProperty(singleRollDataKey)) {
+            entries = betterRollData[singleRollDataKey].entries
+
+            for (let entriesKey in entries) {
+                if (entries.hasOwnProperty(entriesKey)) {
+                    entryTerms = entries[entriesKey].roll.terms
+                    for (entryDiceTermKey in entryTerms) {
+                        if (entryTerms.hasOwnProperty(entryDiceTermKey)) {
+                            entryDiceTerm = entryTerms[entryDiceTermKey]
+                            if (entryDiceTerm.class === "Die" && entryDiceTerm.faces === 20) {
+                                entryDiceTermResults = entryDiceTerm.results
+                                for (entryDiceTermResultKey in entryDiceTermResults) {
+                                    if (entryDiceTermResults.hasOwnProperty(entryDiceTermResultKey)) {
+                                        rolledValue = entryDiceTermResults[entryDiceTermResultKey].result
+                                        if (rolledValue === 1) {
+                                            natural1 = true
+                                        }
+                                        else if (rolledValue === 20) {
+                                            natural20 = true
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+    }
 
-        if (natural20) {
+    return {
+        "nat1" : natural1,
+        "nat20": natural20,
+    }
+}
+
+/**
+ * @param {ChatMessage} message
+ */
+function handleChatMessage(message) {
+    if (message.isRoll) {
+        let handledResult
+
+        if (betterRolls5ePresent && message.roll.dice.length === 0) {
+            handledResult = handleBetterDice5ERolls(message)
+        }
+        else {
+            handledResult = handleNormalRolls(message)
+        }
+
+        if (handledResult.nat20) {
             ChatMessage.create({
                 "content": activeSettings[NAT20_TEXT] + "<img src='" + activeSettings[NAT20_IMAGE_KEY] + "' alt='" + activeSettings[NAT20_TEXT] + "'>",
                 "speaker": {
@@ -77,7 +147,7 @@ function handleChatMessage(message) {
             }).then()
         }
 
-        if (natural1) {
+        if (handledResult.nat1) {
             ChatMessage.create({
                 "content": activeSettings[NAT1_TEXT] + "<img src='" + activeSettings[NAT1_IMAGE_KEY] + "' alt='" + activeSettings[NAT1_TEXT] + "'>",
                 "speaker": {
@@ -90,5 +160,6 @@ function handleChatMessage(message) {
 
 Hooks.on("ready", function () {
     loadConfig()
+    betterRolls5ePresent = game.modules.has("betterrolls5e")
     Hooks.on('createChatMessage', handleChatMessage)
 })
