@@ -128,7 +128,7 @@ function handleBetterDice5ERolls(message) {
  * @param {ChatMessage} message
  */
 function handleChatMessage(message) {
-    if (message.isRoll) {
+    if (message.isRoll && message.data.whisper.length === 0) {
         let handledResult
 
         if (betterRolls5ePresent && message.roll.dice.length === 0) {
